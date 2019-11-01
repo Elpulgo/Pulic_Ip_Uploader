@@ -1,0 +1,9 @@
+{
+  "IFTTTKey": "YOUR_MAKER_KEY",
+  "IFTTTEventName": "YOUR_MAKER_EVENT",
+  "IpProviders": [
+    "http://ipinfo.io/ip",
+    "https://api.ipify.org/",
+    "http://bot.whatismyipaddress.com/"
+  ]
+}
