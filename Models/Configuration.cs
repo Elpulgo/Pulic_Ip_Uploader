@@ -12,12 +12,13 @@ namespace PublicIpUploader.Models
 
         public string GoogleSheetsUrl { get; set; }
 
-        public List<string> IpProviders{ get; set; }
- 
+        public List<string> IpProviders { get; set; }
+
         public EmailConfiguration EmailConfiguration { get; set; }
     }
 
-    public class EmailConfiguration{
+    public class EmailConfiguration
+    {
         public string Sender { get; set; }
         public string Receiver { get; set; }
         public string SmtpServer { get; set; }
