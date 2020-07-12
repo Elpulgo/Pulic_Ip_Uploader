@@ -9,40 +9,47 @@ namespace PublicIpUploader
     {
         private readonly IHttpService m_HttpService;
         private readonly ILocalStore m_LocalStore;
+        private readonly IConfigurationSupplier m_ConfigurationSupplier;
 
         public Executioner(
             IHttpService httpService,
-            ILocalStore localStore
+            ILocalStore localStore,
+            IConfigurationSupplier configurationSupplier
             )
         {
             m_HttpService = httpService;
             m_LocalStore = localStore;
+            m_ConfigurationSupplier = configurationSupplier;
         }
 
         public async Task ExecuteAsync()
         {
-            var publicIp = await m_HttpService.GetPublicIpAsync();
 
-            if (string.IsNullOrEmpty(publicIp))
-                return;
+            var emailManager = new EmailManager(m_ConfigurationSupplier);
+            await emailManager.Execute();
 
-            var oldIp = m_LocalStore.GetStoredPublicIp();
+            // var publicIp = await m_HttpService.GetPublicIpAsync();
 
-            if (oldIp.Equals(publicIp, StringComparison.InvariantCultureIgnoreCase))
-            {
-                Log.Information("Public ip hasn't changed since last time.");
-                return;
-            }
+            // if (string.IsNullOrEmpty(publicIp))
+            //     return;
 
-            var success = await m_HttpService.PostAsync(new IpModel() { Value1 = publicIp });
+            // var oldIp = m_LocalStore.GetStoredPublicIp();
 
-            if (!success)
-                return;
+            // if (oldIp.Equals(publicIp, StringComparison.InvariantCultureIgnoreCase))
+            // {
+            //     Log.Information("Public ip hasn't changed since last time.");
+            //     return;
+            // }
 
-            if (!m_LocalStore.TryStorePublicIp(publicIp))
-                return;
+            // var success = await m_HttpService.PostAsync(new IpModel() { Value1 = publicIp });
 
-            Log.Information($"Successfully triggered IFTTT maker event with public ip '{publicIp}'");
+            // if (!success)
+            //     return;
+
+            // if (!m_LocalStore.TryStorePublicIp(publicIp))
+            //     return;
+
+            // Log.Information($"Successfully triggered IFTTT maker event with public ip '{publicIp}'");
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
+using MimeKit.Text;
 
 namespace PublicIpUploader
 {
@@ -16,59 +17,75 @@ namespace PublicIpUploader
             m_ConfigurationSupplier = configurationSupplier;
         }
 
-        private async Task<bool> ValidateConfigurationAsync()
+        private async Task<(bool, Configuration)> ValidateConfigurationAsync()
         {
             var configuration = await m_ConfigurationSupplier.GetConfigurationAsync();
 
             if (string.IsNullOrEmpty(configuration.EmailConfiguration?.Sender))
-                return false;
+                return (false, null);
 
             if (string.IsNullOrEmpty(configuration.EmailConfiguration?.Receiver))
-                return false;
+                return (false, null);
 
             if (string.IsNullOrEmpty(configuration.EmailConfiguration?.SmtpServer))
-                return false;
+                return (false, null);
 
             if (string.IsNullOrEmpty(configuration.EmailConfiguration?.SenderUserName))
-                return false;
+                return (false, null);
 
             if (string.IsNullOrEmpty(configuration.EmailConfiguration?.SenderPassword))
-                return false;
+                return (false, null);
 
             if (configuration.EmailConfiguration?.Port == int.MaxValue ||
                 configuration.EmailConfiguration?.Port == int.MinValue ||
                 configuration.EmailConfiguration?.Port == 0)
-                return false;
+                return (false, null);
 
-            return true;
+            return (true, configuration);
         }
 
-        public string Get()
+        public async Task Execute()
         {
-            EmailMessage message = new EmailMessage();
-            message.Sender = new MailboxAddress("Self", _notificationMetadata.Sender);
-            message.Reciever = new MailboxAddress("Self", _notificationMetadata.Reciever);
-            message.Subject = "Welcome";
-            message.Content = "Hello World!";
-            var mimeMessage = CreateEmailMessage(message);
+            var (validated, configuration) = await ValidateConfigurationAsync();
 
-            using (var smtpClient = new SmtpClient())
+
+            var messageToSend = new MimeMessage
             {
-                smtpClient.Connect(
-                    _notificationMetadata.SmtpServer,
-                    _notificationMetadata.Port,
-                    true);
+                Sender = new MailboxAddress("El Pulgo Ip Notifier", configuration.EmailConfiguration.Sender),
+                Subject = "IP address for computer has changed!",
+                Body = new TextPart(TextFormat.Plain) { Text = "IP has changed..." }
+            };
 
-                smtpClient.Authenticate(
-                    _notificationMetadata.UserName,
-                    _notificationMetadata.Password);
+            messageToSend.To.Add(new MailboxAddress(configuration.EmailConfiguration.Receiver));
 
-                smtpClient.Send(mimeMessage);
+            Console.WriteLine($"Sender usename is: {configuration.EmailConfiguration.SenderUserName}");
+            Console.WriteLine($"Sender pass is: {configuration.EmailConfiguration.SenderPassword}");
 
-                smtpClient.Disconnect(true);
+            try
+            {
+                using (var smtpClient = new SmtpClient())
+                {
+                    smtpClient.Connect(
+                        configuration.EmailConfiguration.SmtpServer,
+                        configuration.EmailConfiguration.Port,
+                        true);
+
+                    smtpClient.Authenticate(
+                        configuration.EmailConfiguration.SenderUserName,
+                        configuration.EmailConfiguration.SenderPassword);
+
+                    smtpClient.Send(messageToSend);
+
+                    smtpClient.Disconnect(true);
+                }
+
+                Console.WriteLine("Email was sent successfully!");
             }
+            catch (System.Exception ex)
+            {
 
-            return "Email sent successfully";
+                throw;
+            }
         }
     }
 }
