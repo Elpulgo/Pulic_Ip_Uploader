@@ -12,6 +12,13 @@ Set up with a mailserver of your choice, password is saved using dataprotection.
 If using a gmail for sending emails, you will need to tick "Allow unprotected apps" in your gmail.
 Could also work with api-keys, but not implemented that possibility yet.
 
+!!!IMPORTANT!!!
+
+If using email, the program need to run one time through
+terminal so user can setup password for mail server. Runt dotnet PublicIpUploader.dll.
+From there in it can be run as crontab or scheduled task.
+
+!!!!!!!!!!!!!!!
 ___
 ### Configuration (configuration/configuration.json)
 
