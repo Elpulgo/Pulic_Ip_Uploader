@@ -7,7 +7,7 @@ namespace PublicIpUploader
 {
     public class LocalStore : ILocalStore
     {
-        private string StoredPath => Path.Combine(Directory.GetCurrentDirectory(), "publicip.dat");
+        private string StoredPath => Path.Combine(Directory.GetCurrentDirectory(), "configuration", "publicip.dat");
 
         public LocalStore()
         {

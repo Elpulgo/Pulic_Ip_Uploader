@@ -14,6 +14,8 @@ namespace PublicIpUploader.Models
 
         public List<string> IpProviders { get; set; }
 
+        public bool UseEmailNotification { get; set; }
+
         public EmailConfiguration EmailConfiguration { get; set; }
     }
 
@@ -24,6 +26,5 @@ namespace PublicIpUploader.Models
         public string SmtpServer { get; set; }
         public int Port { get; set; }
         public string SenderUserName { get; set; }
-        public string SenderPassword { get; set; }
     }
 }

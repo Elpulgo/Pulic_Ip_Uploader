@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace PublicIpUploader
 {
@@ -28,12 +28,16 @@ namespace PublicIpUploader
         private static void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(configure => configure.AddSerilog());
+            services.AddDataProtection()
+                .SetDefaultKeyLifetime(TimeSpan.FromDays(90));
 
             services.AddSingleton<IHttpService, HttpService>();
             services.AddSingleton<IConfigurationSupplier, ConfigurationSupplier>();
 
             services.AddTransient<ILocalStore, LocalStore>();
             services.AddTransient<IExecutioner, Executioner>();
+            services.AddTransient<EmailManager>();
+            services.AddTransient<DataProtector>();
         }
 
         private static bool SetupLogger()
